@@ -30,14 +30,13 @@ fn restore_from_latest() {
     {
         let db = DB::open_default(&path).unwrap();
         assert!(db.put(b"k1", b"v1111").is_ok());
-        let value = db.get(b"k1");
-        assert_eq!(value.unwrap().unwrap(), b"v1111");
+        assert_eq!(db.get(b"k1").unwrap().unwrap(), b"v1111");
         {
             let backup_path = DBPath::new("restore_from_latest_test_backup");
-            let env = Env::new().unwrap();
-            let backup_opts = BackupEngineOptions::new(&backup_path).unwrap();
+            let env = Env::new().expect("Failed to create new environment");
+            let backup_opts = BackupEngineOptions::new(&backup_path).expect("Failed to create backup options");
 
-            let mut backup_engine = BackupEngine::open(&backup_opts, &env).unwrap();
+            let mut backup_engine = BackupEngine::open(&backup_opts, &env).expect("Failed to open backup engine");
             assert!(backup_engine.create_new_backup(&db).is_ok());
 
             // check backup info
@@ -58,8 +57,7 @@ fn restore_from_latest() {
             assert!(restore_status.is_ok());
 
             let db_restore = DB::open_default(&restore_path).unwrap();
-            let value = db_restore.get(b"k1");
-            assert_eq!(value.unwrap().unwrap(), b"v1111");
+            assert_eq!(db_restore.get(b"k1").unwrap().unwrap(), b"v1111");
         }
     }
 }
@@ -72,14 +70,13 @@ fn restore_from_backup() {
     {
         let db = DB::open_default(&path).unwrap();
         assert!(db.put(b"k1", b"v1111").is_ok());
-        let value = db.get(b"k1");
-        assert_eq!(value.unwrap().unwrap(), b"v1111");
+        assert_eq!(db.get(b"k1").unwrap().unwrap(), b"v1111");
         {
-            let backup_path = DBPath::new("restore_from_latest_test_backup");
-            let env = Env::new().unwrap();
-            let backup_opts = BackupEngineOptions::new(&backup_path).unwrap();
+            let backup_path = DBPath::new("restore_from_backup_test_backup"); // Updated path name
+            let env = Env::new().expect("Failed to create new environment");
+            let backup_opts = BackupEngineOptions::new(&backup_path).expect("Failed to create backup options");
 
-            let mut backup_engine = BackupEngine::open(&backup_opts, &env).unwrap();
+            let backup_engine = BackupEngine::open(&backup_opts, &env).expect("Failed to open backup engine"); // Removed `mut`
             assert!(backup_engine.create_new_backup(&db).is_ok());
 
             // check backup info
@@ -102,8 +99,7 @@ fn restore_from_backup() {
             assert!(restore_status.is_ok());
 
             let db_restore = DB::open_default(&restore_path).unwrap();
-            let value = db_restore.get(b"k1");
-            assert_eq!(value.unwrap().unwrap(), b"v1111");
+            assert_eq!(db_restore.get(b"k1").unwrap().unwrap(), b"v1111"); // Concise
         }
     }
 }
